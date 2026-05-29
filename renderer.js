@@ -1,24 +1,11 @@
 let lastData = null;
 
-function showModal() {
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-function closeModal() {
-  document.getElementById("modal").classList.add("hidden");
-}
-
 async function run() {
   const docs = [
     document.getElementById("d1").value,
     document.getElementById("d2").value,
     document.getElementById("d3").value
-  ].filter(text => text.trim() !== "");
-
-  if (docs.length < 2) {
-    showModal();
-    return;
-  }
+  ].filter(Boolean);
 
   const res = await window.api.compare(docs);
 
