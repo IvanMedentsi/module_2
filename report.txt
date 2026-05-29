@@ -1,0 +1,7 @@
+
+TEXT SIMILARITY REPORT
+====================
+
+Document 1 ↔ Document 2 = 5.76%
+Document 1 ↔ Document 3 = 45.83%
+Document 2 ↔ Document 3 = 18.16%
