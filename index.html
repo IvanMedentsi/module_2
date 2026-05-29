@@ -13,6 +13,20 @@
   <h1>TF-IDF аналіз подібності текстів</h1>
   <p class="sub">Порівняння документів за допомогою косинусної міри подібності</p>
 
+  <div class="file-section">
+
+    <input type="file" id="fileInput" multiple accept=".txt" hidden />
+
+    <div class="buttons">
+      <button onclick="document.getElementById('fileInput').click()">
+        Додати файли (.txt)
+      </button>
+    </div>
+
+    <p class="info">Мінімум 2 файли або тексти для аналізу</p>
+
+  </div>
+
   <div class="grid">
 
     <textarea id="d1" placeholder="Документ 1"></textarea>
@@ -26,12 +40,11 @@
     <button onclick="run()">Порівняти документи</button>
     <button onclick="exportReport()">Експортувати звіт</button>
 
+    <button onclick="clearAll()">Очистити все</button>
+
   </div>
-
   <div id="result" class="result"></div>
-
 </div>
-
 
 <div id="modal" class="modal hidden">
   <div class="modal-content">

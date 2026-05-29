@@ -5,7 +5,6 @@ const { analyze } = require("./backend");
 
 let win;
 
-// 🔹 LOG FILE
 const logPath = path.join(__dirname, "app.log");
 
 function log(message) {
