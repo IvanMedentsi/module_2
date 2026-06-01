@@ -1,0 +1,11 @@
+{
+    "appName": "AI Plagiarism Detection System",
+    "version": "1.1.0",
+    "maxDocuments": 3,
+    "reportFile": "report.txt",
+    "similarityLevels": {
+      "low": 20,
+      "medium": 50,
+      "high": 75
+    }
+  }

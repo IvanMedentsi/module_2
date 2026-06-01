@@ -1,7 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const mammoth = require("mammoth");
 const { analyze } = require("./backend");
+const config = require("./config.json");
 
 let win;
 
@@ -28,7 +30,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  log("Application started");
+  log(`${config.appName} v${config.version} started`);
   createWindow();
 });
 
@@ -36,6 +38,43 @@ app.on("window-all-closed", () => {
   log("Application closed");
 
   if (process.platform !== "darwin") app.quit();
+});
+
+ipcMain.handle("read-files", async (e, files) => {
+  try {
+    log(`File reading started. Files count: ${files.length}`);
+
+    const texts = [];
+
+    for (const file of files) {
+      const ext = path.extname(file.path).toLowerCase();
+
+      if (ext === ".txt") {
+        const text = fs.readFileSync(file.path, "utf-8");
+        texts.push(text);
+      } else if (ext === ".docx") {
+        const result = await mammoth.extractRawText({ path: file.path });
+        texts.push(result.value);
+      } else {
+        log(`Unsupported file format ignored: ${file.name}`);
+      }
+    }
+
+    log("File reading completed successfully");
+
+    return {
+      success: true,
+      texts
+    };
+
+  } catch (err) {
+    log(`ERROR reading files: ${err.message}`);
+
+    return {
+      success: false,
+      error: "File reading failed"
+    };
+  }
 });
 
 ipcMain.handle("compare-texts", (e, docs) => {
@@ -48,7 +87,9 @@ ipcMain.handle("compare-texts", (e, docs) => {
 
     return {
       success: true,
-      results: result
+      results: result,
+      analyzedAt: new Date().toISOString(),
+      docsCount: docs.length
     };
 
   } catch (err) {
@@ -65,16 +106,33 @@ ipcMain.handle("export-report", (e, data) => {
   try {
     log("Export report started");
 
-    const report = `
-TEXT SIMILARITY REPORT
-====================
+    const maxResult = data.results.reduce((max, item) => {
+      return item.similarity > max.similarity ? item : max;
+    }, data.results[0]);
 
+    const report = `
+${config.appName}
+Version: ${config.version}
+
+TEXT SIMILARITY REPORT
+======================
+
+Дата аналізу: ${data.analyzedAt}
+Кількість документів: ${data.docsCount}
+
+Результати порівняння:
 ${data.results.map(r =>
-  `Document ${r.doc1} ↔ Document ${r.doc2} = ${r.similarity}%`
+  `Document ${r.doc1} ↔ Document ${r.doc2} = ${r.similarity}% — ${r.level}`
 ).join("\n")}
+
+Висновок:
+Найбільший рівень збігу виявлено між Document ${maxResult.doc1} та Document ${maxResult.doc2}: ${maxResult.similarity}% — ${maxResult.level}.
+
+Примітка:
+Система визначає текстову подібність документів. Високий рівень збігу може свідчити про можливі запозичення та потребує додаткової перевірки.
 `;
 
-    fs.writeFileSync("report.txt", report);
+    fs.writeFileSync(config.reportFile, report);
 
     log("Report saved successfully");
 

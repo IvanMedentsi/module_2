@@ -1,5 +1,6 @@
 const natural = require("natural");
 const TfIdf = natural.TfIdf;
+const config = require("./config.json");
 
 function clean(text) {
   return text
@@ -7,6 +8,24 @@ function clean(text) {
     .replace(/[^a-zа-яіїєґ0-9 ]/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function getSimilarityLevel(percent) {
+  const levels = config.similarityLevels;
+
+  if (percent < levels.low) {
+    return "Низький рівень збігу";
+  }
+
+  if (percent < levels.medium) {
+    return "Середній рівень збігу";
+  }
+
+  if (percent < levels.high) {
+    return "Високий рівень збігу";
+  }
+
+  return "Критичний рівень збігу / можливе запозичення";
 }
 
 function cosine(vecA, vecB) {
@@ -32,16 +51,20 @@ function cosine(vecA, vecB) {
 
 function vector(tfidf, index) {
   const v = {};
+
   tfidf.listTerms(index).forEach(t => {
     v[t.term] = t.tfidf;
   });
+
   return v;
 }
 
 function analyze(documents) {
   const tfidf = new TfIdf();
 
-  const cleaned = documents.map(clean);
+  const cleaned = documents
+    .map(clean)
+    .filter(doc => doc.length > 0);
 
   cleaned.forEach(doc => tfidf.addDocument(doc));
 
@@ -54,10 +77,13 @@ function analyze(documents) {
         vector(tfidf, j)
       );
 
+      const percent = +(sim * 100).toFixed(2);
+
       results.push({
         doc1: i + 1,
         doc2: j + 1,
-        similarity: +(sim * 100).toFixed(2)
+        similarity: percent,
+        level: getSimilarityLevel(percent)
       });
     }
   }

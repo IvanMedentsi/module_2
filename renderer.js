@@ -16,9 +16,27 @@ document.getElementById("fileInput")?.addEventListener("change", async (event) =
 
   if (files.length === 0) return;
 
-  const texts = await Promise.all(files.map(f => f.text()));
+  const preparedFiles = files.map(file => ({
+    name: file.name,
+    path: file.path
+  }));
 
-  loadedFiles = loadedFiles.concat(texts);
+  const response = await window.api.readFiles(preparedFiles);
+
+  if (!response.success) {
+    showModal("Не вдалося прочитати файли");
+    return;
+  }
+
+  const texts = response.texts.filter(text => text.trim() !== "");
+
+  const combinedFiles = loadedFiles.concat(texts);
+
+  if (combinedFiles.length > 3) {
+    showModal("У поточній версії аналізуються тільки перші 3 документи");
+  }
+
+  loadedFiles = combinedFiles.slice(0, 3);
 
   event.target.value = "";
 
@@ -27,9 +45,11 @@ document.getElementById("fileInput")?.addEventListener("change", async (event) =
   document.getElementById("d3").value = loadedFiles[2] || "";
 
   if (loadedFiles.length < 2) {
-    showModal("Потрібно завантажити мінімум 2 файли для аналізу");
+    showModal("Потрібно завантажити мінімум 2 непорожні документи для аналізу");
   }
 });
+
+
 
 async function run() {
   const docs = [
@@ -45,19 +65,32 @@ async function run() {
 
   const res = await window.api.compare(docs);
 
+  if (!res.success) {
+    showModal("Помилка під час аналізу документів");
+    return;
+  }
+
   lastData = res;
 
   document.getElementById("result").innerHTML =
     res.results.map(r =>
-      `Doc ${r.doc1} ↔ Doc ${r.doc2}: <b>${r.similarity}%</b>`
+      `Doc ${r.doc1} ↔ Doc ${r.doc2}: <b>${r.similarity}%</b> — ${r.level}`
     ).join("<br>");
 }
 
 async function exportReport() {
-  if (!lastData) return;
+  if (!lastData) {
+    showModal("Спочатку виконайте аналіз документів");
+    return;
+  }
 
-  await window.api.exportReport(lastData);
-  alert("Report saved as report.txt");
+  const response = await window.api.exportReport(lastData);
+
+  if (response.success) {
+    alert("Звіт збережено у файл report.txt");
+  } else {
+    showModal("Не вдалося зберегти звіт");
+  }
 }
 
 function clearAll() {

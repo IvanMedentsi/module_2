@@ -10,20 +10,20 @@
 
 <div class="app">
 
-  <h1>TF-IDF аналіз подібності текстів</h1>
-  <p class="sub">Порівняння документів за допомогою косинусної міри подібності</p>
+  <h1>AI-система виявлення плагіату</h1>
+  <p class="sub">Порівняння документів за допомогою TF-IDF та косинусної міри подібності</p>
 
   <div class="file-section">
 
-    <input type="file" id="fileInput" multiple accept=".txt" hidden />
+    <input type="file" id="fileInput" multiple accept=".txt,.docx" hidden />
 
     <div class="buttons">
       <button onclick="document.getElementById('fileInput').click()">
-        Додати файли (.txt)
+        Додати файли (.txt / .docx)
       </button>
     </div>
 
-    <p class="info">Мінімум 2 файли або тексти для аналізу</p>
+    <p class="info">Мінімум 2 документи для аналізу. Підтримуються формати .txt та .docx</p>
 
   </div>
 
@@ -39,11 +39,12 @@
 
     <button onclick="run()">Порівняти документи</button>
     <button onclick="exportReport()">Експортувати звіт</button>
-
     <button onclick="clearAll()">Очистити все</button>
 
   </div>
+
   <div id="result" class="result"></div>
+
 </div>
 
 <div id="modal" class="modal hidden">

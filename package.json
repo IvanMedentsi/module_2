@@ -1,20 +1,25 @@
 {
   "name": "module_1",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "AI plagiarism detection system based on TF-IDF and cosine similarity",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": [],
+  "keywords": [
+    "plagiarism",
+    "tf-idf",
+    "cosine-similarity",
+    "electron",
+    "nlp"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "cors": "^2.8.6",
     "electron": "^42.3.0",
-    "express": "^5.2.1",
+    "mammoth": "^1.11.0",
     "natural": "^8.1.1"
   }
 }
